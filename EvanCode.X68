@@ -53,7 +53,7 @@ CODE0000    STOP    #$2700
 CODE0001    STOP    #$2700
 CODE0010    STOP    #$2700
 CODE0011    STOP    #$2700
-CODE0100    BRA     WRITE_NOP
+CODE0100    BRA     CHOOSE0100
 CODE0101    STOP    #$2700
 CODE0110    STOP    #$2700
 CODE0111    STOP    #$2700
@@ -69,18 +69,26 @@ CODE1111    STOP    #$2700
 ******
 *0100*
 ******
-* Isolate bits 6/7/8 of the entire instruction
-WRITE_NOP   MOVE.W  D2,D0       ; Entire instruction is saved in D2,
+CHOOSE0100
+            MOVE.W  D2,D0       ; Entire instruction is saved in D2,
                                 ;   so move that into D0
             MOVE.B  #23,D1      ; Load 23 into D1 for shifting
             LSL.L   D1,D0       ; Shift D0 left by 23 bits
             MOVE.B  #29,D1      ; Load 29 into D1 for shifting
             LSR.L   D1,D0       ; Shift D0 right by 29 bits
-          * At this point, we have isolated bits 6/7/8 to D0
-            CMP.B   #%001,D0    ; 
-            
+            * At this point, we have isolated bits 6/7/8 to D0
+            CMP.B   #%001,D0    ;If bytes are equal to the specific op code
+            BEQ     WRITE_NOP   ;branch to it
+            CMP.B   #%111
+            BEQ     WRITE_LEA
+            CMP.B   #%010
+            BEQ     WRITE_JSR 
+    
+WRITE_NOP   
+            ;ADD TAB            
 
             END    START                ; last line of source
+
 
 
 *~Font name~Courier New~
