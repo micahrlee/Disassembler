@@ -1,176 +1,277 @@
 00001000 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.14.01
-Created On: 5/29/2014 5:18:25 PM
+Created On: 5/30/2014 3:01:58 AM
 
 00000000                             1  *-----------------------------------------------------------
-00000000                             2  * Title      : Evan's Code
-00000000                             3  * Written by : Evan Yang
-00000000                             4  * Date       :
-00000000                             5  * Description:
+00000000                             2  * Title      : Evan's BLUE GROUP Code
+00000000                             3  * Written by : Evan Yang AND CO.
+00000000                             4  * Date       : 30 MAY 2014
+00000000                             5  * Description: 68K DISASSEMBLER
 00000000                             6  *-----------------------------------------------------------
-00000000                             7  * D0 holds the bits we are immediately concerned with
-00000000                             8  * D1 holds the shift amount
-00000000                             9  * D2 holds the entire instruction we are currently decoding
-00000000                            10  * A0 holds the JMP_TABLE starting address
-00000000                            11  * A1 holds the GOOD_BUFFER starting address
-00000000                            12  * A2 holds the BAD_BUFFER starting address 
-00000000                            13  
-00000000  =0000A000                 14  STACK       EQU     $A000
-00000000  =0000E000                 15  GOOD_BUFFER EQU     $0000E000           ; Store valid instruction
-00000000  =0000F000                 16  BAD_BUFFER  EQU     $0000F000           ; Store invalid or non-required opcodes
-00000000  =00004E71                 17  NOP_BITS    EQU     %0100111001110001
-00000000                            18          
-00001000                            19  START       ORG     $1000               ; first instruction of program
-00001000  4FF9 0000A000             20              LEA     STACK,SP            ; Load stack pointer
-00001006  41F9 00001032             21              LEA     JMP_TABLE,A0        ; Load A0
-0000100C  43F9 0000E000             22              LEA     GOOD_BUFFER,A1         
-00001012  45F9 0000F000             23              LEA     BAD_BUFFER,A2      
-00001018  6000 0002                 24              BRA     GET_OPCODE
-0000101C                            25              
-0000101C                            26  GET_OPCODE            
-0000101C  4280                      27              CLR.L   D0                  ; Clear D0
-0000101E  303C 4E71                 28              MOVE.W  #NOP_BITS,D0
-00001022  3400                      29              MOVE.W  D0,D2               ; To save instruction, also move D0 into D2
-00001024  123C 000C                 30              MOVE.B  #12,D1              ; Load 12 into D1      
-00001028  E268                      31              LSR.W   D1,D0               ; Shifts D0 right by 12 bits
-0000102A                            32              * At this point, D0 has 4 MSBs
-0000102A  C0FC 0006                 33              MULU    #6,D0               ; Form offset
-0000102E  4EB0 0000                 34              JSR     0(A0,D0)            ; Jump indirect with index
-00001032                            35              
-00001032                            36  ***********************************************************
-00001032                            37  * Credit: Professor Kim's "Project Description - Addendum"*
-00001032                            38  * This table covers all 16 possible combinations for the  *
-00001032                            39  * 4 MSBs.                                                 *
-00001032                            40  ***********************************************************
-00001032  4EF9 00001092             41  JMP_TABLE   JMP     CODE0000
-00001038  4EF9 00001096             42              JMP     CODE0001
-0000103E  4EF9 0000109A             43              JMP     CODE0010
-00001044  4EF9 0000109E             44              JMP     CODE0011
-0000104A  4EF9 000010A2             45              JMP     CODE0100
-00001050  4EF9 000010A6             46              JMP     CODE0101
-00001056  4EF9 000010AA             47              JMP     CODE0110
-0000105C  4EF9 000010AE             48              JMP     CODE0111
-00001062  4EF9 000010B2             49              JMP     CODE1000
-00001068  4EF9 000010B6             50              JMP     CODE1001
-0000106E  4EF9 000010BA             51              JMP     CODE1010
-00001074  4EF9 000010BE             52              JMP     CODE1011
-0000107A  4EF9 000010C2             53              JMP     CODE1100
-00001080  4EF9 000010C6             54              JMP     CODE1101
-00001086  4EF9 000010CA             55              JMP     CODE1110
-0000108C  4EF9 000010CE             56              JMP     CODE1111
-00001092                            57              
-00001092                            58  ***********************************************************
-00001092                            59  * Credit: Professor Kim's "Project Description - Addendum"*
-00001092                            60  * This section is where the JMP_TABLE jumps to, based on  *
-00001092                            61  * the jump destination.                                   *
-00001092                            62  *********************************************************** 
-00001092  6000 003E                 63  CODE0000    BRA     CHOOSE0000
-00001096  6000 003A                 64  CODE0001    BRA     CHOOSE0001
-0000109A  6000 0036                 65  CODE0010    BRA     CHOOSE0010
-0000109E  6000 0032                 66  CODE0011    BRA     CHOOSE0011
-000010A2  6000 002E                 67  CODE0100    BRA     CHOOSE0100
-000010A6  6000 00E0                 68  CODE0101    BRA     CHOOSE0101
-000010AA  6000 00DC                 69  CODE0110    BRA     CHOOSE0110
-000010AE  6000 00D8                 70  CODE0111    BRA     CHOOSE0111
-000010B2  6000 00D4                 71  CODE1000    BRA     CHOOSE1000
-000010B6  6000 00D0                 72  CODE1001    BRA     CHOOSE1001
-000010BA  6000 00CC                 73  CODE1010    BRA     CHOOSE1010
-000010BE  6000 00C8                 74  CODE1011    BRA     CHOOSE1011
-000010C2  6000 00C4                 75  CODE1100    BRA     CHOOSE1100
-000010C6  6000 00C0                 76  CODE1101    BRA     CHOOSE1101
-000010CA  6000 00BC                 77  CODE1110    BRA     CHOOSE1110
-000010CE  6000 00B8                 78  CODE1111    BRA     CHOOSE1111
-000010D2                            79  
-000010D2                            80  CHOOSE0000
-000010D2                            81  CHOOSE0001
-000010D2                            82  CHOOSE0010
-000010D2                            83  CHOOSE0011
-000010D2                            84  ******
-000010D2                            85  *0100*
-000010D2                            86  ******
-000010D2                            87  CHOOSE0100
-000010D2  3002                      88              MOVE.W  D2,D0       ; Entire instruction is saved in D2,
-000010D4                            89                                  ;   so move that into D0
-000010D4  123C 0017                 90              MOVE.B  #23,D1      ; Load 23 into D1 for shifting
-000010D8  E3A8                      91              LSL.L   D1,D0       ; Shift D0 left by 23 bits
-000010DA  123C 001D                 92              MOVE.B  #29,D1      ; Load 29 into D1 for shifting
-000010DE  E2A8                      93              LSR.L   D1,D0       ; Shift D0 right by 29 bits
-000010E0                            94              
-000010E0                            95              * At this point, we have isolated bits 6/7/8 to D0
-000010E0                            96              
-000010E0  B03C 0001                 97              CMP.B   #%001,D0    ; If bytes are equal to the specific op code
-000010E4  6700 0012                 98              BEQ     WRITE_NOP   ;   branch to it
-000010E8  B03C 0002                 99              CMP.B   #%010,D0
-000010EC  6700 0072                100              BEQ     WRITE_JSR             
-000010F0  B03C 0007                101              CMP.B   #%111,D0
-000010F4  6700 007E                102              BEQ     WRITE_LEA
-000010F8                           103  
-000010F8                           104  *001    
-000010F8                           105  WRITE_NOP   
-000010F8  4291                     106              CLR.L     (A1)            ; Clear data that A1 points to
-000010FA  12FC 004E                107              MOVE.B  #'N',(A1)+
-000010FE  12FC 004F                108              MOVE.B  #'O',(A1)+
-00001102  12FC 0050                109              MOVE.B  #'P',(A1)+
-00001106  12FC 0058                110              MOVE.B  #'X',(A1)+
-0000110A  12FC 0020                111              MOVE.B  #' ',(A1)+
-0000110E  12FC 0020                112              MOVE.B  #' ',(A1)+
-00001112  12FC 0020                113              MOVE.B  #' ',(A1)+
-00001116  12FC 0020                114              MOVE.B  #' ',(A1)+
-0000111A  12FC 0020                115              MOVE.B  #' ',(A1)+
-0000111E  12FC 0020                116              MOVE.B  #' ',(A1)+
-00001122  12FC 0020                117              MOVE.B  #' ',(A1)+
-00001126  12FC 0020                118              MOVE.B  #' ',(A1)+
-0000112A  12FC 0020                119              MOVE.B  #' ',(A1)+
-0000112E  12FC 0020                120              MOVE.B  #' ',(A1)+
-00001132  12FC 0020                121                          MOVE.B  #' ',(A1)+
-00001136  12FC 0020                122              MOVE.B  #' ',(A1)+
-0000113A  12FC 0020                123              MOVE.B  #' ',(A1)+
-0000113E  12FC 0020                124              MOVE.B  #' ',(A1)+
-00001142  12FC 0020                125              MOVE.B  #' ',(A1)+
-00001146  12FC 0020                126              MOVE.B  #' ',(A1)+
-0000114A  12FC 0020                127              MOVE.B  #' ',(A1)+
-0000114E  12FC 0020                128              MOVE.B  #' ',(A1)+
-00001152  12FC 0020                129              MOVE.B  #' ',(A1)+
-00001156  12FC 0020                130              MOVE.B  #' ',(A1)+
-0000115A  4EB9 00001188            131              JSR    PRINT_GOOD_BUFFER
-00001160                           132  
-00001160                           133  *010
-00001160                           134  WRITE_JSR
-00001160  4291                     135              CLR.L   (A1)            ; Clear data that A1 points to
-00001162  12FC 004A                136              MOVE.B  #'J',(A1)+
-00001166  12FC 0053                137              MOVE.B  #'S',(A1)+
-0000116A  12FC 0052                138              MOVE.B  #'R',(A1)+
-0000116E  4EB9 00001188            139              JSR    PRINT_GOOD_BUFFER    
-00001174                           140  
-00001174                           141  *111
-00001174                           142  WRITE_LEA
-00001174  4291                     143              CLR.L   (A1)            ; Clear data that A1 points to
-00001176  12FC 004C                144              MOVE.B  #'L',(A1)+
-0000117A  12FC 0045                145              MOVE.B  #'E',(A1)+
-0000117E  12FC 0041                146              MOVE.B  #'A',(A1)+
-00001182  4EB9 00001188            147              JSR    PRINT_GOOD_BUFFER
-00001188                           148  
-00001188                           149  CHOOSE0101
-00001188                           150  CHOOSE0110
-00001188                           151  CHOOSE0111
-00001188                           152  CHOOSE1000
-00001188                           153  CHOOSE1001
-00001188                           154  CHOOSE1010
-00001188                           155  CHOOSE1011
-00001188                           156  CHOOSE1100
-00001188                           157  CHOOSE1101
-00001188                           158  CHOOSE1110
-00001188                           159  CHOOSE1111
-00001188                           160  
-00001188                           161  PRINT_GOOD_BUFFER
-00001188  43F9 0000E000            162              LEA     GOOD_BUFFER,A1  ; Move A1's pointer back so it can
-0000118E                           163                                      ;   print entire op-code word
-0000118E  103C 0001                164              MOVE.B  #1,D0           ; Load code #1
-00001192  4E4F                     165              TRAP    #15             ; Call Trap #1
-00001194                           166  
-00001194                           167  ****************** Do not write past here *****************            
-00001194                           168              
-00001194                           169              END    START                ; last line of source
+00000000                             7  
+00000000                             8  ********  ADDRESS AND REGISTER DESIGNATIONS  ***************
+00000000                             9  
+00000000                            10  * D0 holds the bits we are immediately concerned with
+00000000                            11  * D1 holds the shift amount
+00000000                            12  * D2 holds the entire instruction we are currently decoding
+00000000                            13  * D3 holds the size of the OPCODE instruction (Byte, Word, Long)
+00000000                            14  
+00000000                            15  * A0 holds the JMP_TABLE starting address
+00000000                            16  * A1 holds the GOOD_BUFFER starting address
+00000000                            17  * A2 holds the BAD_BUFFER starting address 
+00000000                            18  
+00000000                            19  ************************************************************
+00000000                            20  
+00000000  =0000A000                 21  STACK       EQU     $A000
+00000000  =0000E000                 22  GOOD_BUFFER EQU     $0000E000           ; Store valid instruction
+00000000  =0000F000                 23  BAD_BUFFER  EQU     $0000F000           ; Store invalid or non-required opcodes
+00000000  =00004E71                 24  NOP_BITS    EQU     %0100111001110001
+00000000                            25  
+00000000                            26  *****    SYMBOLS AND SPECIAL FUNCTIONS/CHARACTERS     ******
+00000000                            27  
+00000000  =0000000D                 28  CR          EQU     $0D ; Carriage return
+00000000  =0000000A                 29  LF          EQU     $0A ; Line feed
+00000000  =00000009                 30  TAB         EQU     $09 ; '   '
+00000000  =0000002C                 31  COMMA       EQU     $2C ; ,
+00000000  =00000000                 32  NULL        EQU     $00 ; 
+00000000  =00000028                 33  O_PAREN     EQU     $28 ; (
+00000000  =00000029                 34  C_PAREN     EQU     $29 ; )
+00000000  =0000002B                 35  PLUS        EQU     $2B ; +
+00000000  =0000002D                 36  MINUS       EQU     $2D ; -
+00000000  =00000023                 37  HASH        EQU     $23 ; #
+00000000  =00000024                 38  MONEY       EQU     $24 ; $
+00000000  =0000002E                 39  PERIOD      EQU     $2E ; .
+00000000                            40          
+00001000                            41  START       ORG     $1000               ; first instruction of program
+00001000  4FF9 0000A000             42              LEA     STACK,SP            ; Load stack pointer
+00001006  41F9 00001032             43              LEA     JMP_TABLE,A0        ; Load A0
+0000100C  43F9 0000E000             44              LEA     GOOD_BUFFER,A1         
+00001012  45F9 0000F000             45              LEA     BAD_BUFFER,A2      
+00001018  6000 0002                 46              BRA     GET_OPCODE
+0000101C                            47              
+0000101C                            48  GET_OPCODE            
+0000101C  4280                      49              CLR.L   D0                  ; Clear D0
+0000101E  303C 4E71                 50              MOVE.W  #NOP_BITS,D0
+00001022  3400                      51              MOVE.W  D0,D2               ; To save instruction, also move D0 into D2
+00001024  123C 000C                 52              MOVE.B  #12,D1              ; Load 12 into D1      
+00001028  E268                      53              LSR.W   D1,D0               ; Shifts D0 right by 12 bits
+0000102A                            54              * At this point, D0 has 4 MSBs
+0000102A  C0FC 0006                 55              MULU    #6,D0               ; Form offset
+0000102E  4EB0 0000                 56              JSR     0(A0,D0)            ; Jump indirect with index
+00001032                            57              
+00001032                            58  ***********************************************************
+00001032                            59  * Credit: Professor Kim's "Project Description - Addendum"*
+00001032                            60  * This table covers all 16 possible combinations for the  *
+00001032                            61  * 4 MSBs.                                                 *
+00001032                            62  ***********************************************************
+00001032  4EF9 00001092             63  JMP_TABLE   JMP     CODE0000
+00001038  4EF9 00001096             64              JMP     CODE0001
+0000103E  4EF9 0000109A             65              JMP     CODE0010
+00001044  4EF9 0000109E             66              JMP     CODE0011
+0000104A  4EF9 000010A2             67              JMP     CODE0100
+00001050  4EF9 000010A6             68              JMP     CODE0101
+00001056  4EF9 000010AA             69              JMP     CODE0110
+0000105C  4EF9 000010AE             70              JMP     CODE0111
+00001062  4EF9 000010B2             71              JMP     CODE1000
+00001068  4EF9 000010B6             72              JMP     CODE1001
+0000106E  4EF9 000010BA             73              JMP     CODE1010
+00001074  4EF9 000010BE             74              JMP     CODE1011
+0000107A  4EF9 000010C2             75              JMP     CODE1100
+00001080  4EF9 000010C6             76              JMP     CODE1101
+00001086  4EF9 000010CA             77              JMP     CODE1110
+0000108C  4EF9 000010CE             78              JMP     CODE1111
+00001092                            79              
+00001092                            80  ***********************************************************
+00001092                            81  * Credit: Professor Kim's "Project Description - Addendum"*
+00001092                            82  * This section is where the JMP_TABLE jumps to, based on  *
+00001092                            83  * the jump destination.                                   *
+00001092                            84  *********************************************************** 
+00001092  6000 003E                 85  CODE0000    BRA     CHOOSE0000
+00001096  6000 003A                 86  CODE0001    BRA     CHOOSE0001
+0000109A  6000 0036                 87  CODE0010    BRA     CHOOSE0010
+0000109E  6000 0032                 88  CODE0011    BRA     CHOOSE0011
+000010A2  6000 002E                 89  CODE0100    BRA     CHOOSE0100
+000010A6  6000 00E0                 90  CODE0101    BRA     CHOOSE0101
+000010AA  6000 00DC                 91  CODE0110    BRA     CHOOSE0110
+000010AE  6000 00D8                 92  CODE0111    BRA     CHOOSE0111
+000010B2  6000 00D4                 93  CODE1000    BRA     CHOOSE1000
+000010B6  6000 00D0                 94  CODE1001    BRA     CHOOSE1001
+000010BA  6000 00CC                 95  CODE1010    BRA     CHOOSE1010
+000010BE  6000 00C8                 96  CODE1011    BRA     CHOOSE1011
+000010C2  6000 00C4                 97  CODE1100    BRA     CHOOSE1100
+000010C6  6000 00C0                 98  CODE1101    BRA     CHOOSE1101
+000010CA  6000 00BC                 99  CODE1110    BRA     CHOOSE1110
+000010CE  6000 00B8                100  CODE1111    BRA     CHOOSE1111
+000010D2                           101  
+000010D2                           102  CHOOSE0000
+000010D2                           103  CHOOSE0001
+000010D2                           104  CHOOSE0010
+000010D2                           105  CHOOSE0011
+000010D2                           106  
+000010D2                           107  ***********************************************************
+000010D2                           108  *         0000       Bit manipulation/MOVEP/Immediate     *
+000010D2                           109  ***********************************************************
+000010D2                           110  
+000010D2                           111  ***********************************************************
+000010D2                           112  *         0001       Move Byte                            *
+000010D2                           113  ***********************************************************
+000010D2                           114  
+000010D2                           115  ***********************************************************
+000010D2                           116  *         0010       Move Word                            *
+000010D2                           117  ***********************************************************
+000010D2                           118  
+000010D2                           119  ***********************************************************
+000010D2                           120  *         0011       Move Long                            *
+000010D2                           121  ***********************************************************
+000010D2                           122  
+000010D2                           123  ***********************************************************
+000010D2                           124  *         0100       Miscellaneous                        *
+000010D2                           125  ***********************************************************
+000010D2                           126  
+000010D2                           127  CHOOSE0100
+000010D2  3002                     128              MOVE.W  D2,D0       ; Entire instruction is saved in D2,
+000010D4                           129                                  ;   so move that into D0
+000010D4  123C 0017                130              MOVE.B  #23,D1      ; Load 23 into D1 for shifting
+000010D8  E3A8                     131              LSL.L   D1,D0       ; Shift D0 left by 23 bits
+000010DA  123C 001D                132              MOVE.B  #29,D1      ; Load 29 into D1 for shifting
+000010DE  E2A8                     133              LSR.L   D1,D0       ; Shift D0 right by 29 bits
+000010E0                           134              
+000010E0                           135              * At this point, we have isolated bits 6/7/8 to D0
+000010E0                           136              
+000010E0  B03C 0001                137              CMP.B   #%001,D0    ; If bytes are equal to the specific op code
+000010E4  6700 0012                138              BEQ     WRITE_NOP   ;   branch to it
+000010E8  B03C 0002                139              CMP.B   #%010,D0
+000010EC  6700 0072                140              BEQ     WRITE_JSR             
+000010F0  B03C 0007                141              CMP.B   #%111,D0
+000010F4  6700 007E                142              BEQ     WRITE_LEA
+000010F8                           143  
+000010F8                           144  *001    
+000010F8                           145  WRITE_NOP   
+000010F8  4291                     146              CLR.L     (A1)            ; Clear data that A1 points to
+000010FA  12FC 004E                147              MOVE.B  #'N',(A1)+
+000010FE  12FC 004F                148              MOVE.B  #'O',(A1)+
+00001102  12FC 0050                149              MOVE.B  #'P',(A1)+
+00001106  12FC 0058                150              MOVE.B  #'X',(A1)+
+0000110A  12FC 0020                151              MOVE.B  #' ',(A1)+
+0000110E  12FC 0020                152              MOVE.B  #' ',(A1)+
+00001112  12FC 0020                153              MOVE.B  #' ',(A1)+
+00001116  12FC 0020                154              MOVE.B  #' ',(A1)+
+0000111A  12FC 0020                155              MOVE.B  #' ',(A1)+
+0000111E  12FC 0020                156              MOVE.B  #' ',(A1)+
+00001122  12FC 0020                157              MOVE.B  #' ',(A1)+
+00001126  12FC 0020                158              MOVE.B  #' ',(A1)+
+0000112A  12FC 0020                159              MOVE.B  #' ',(A1)+
+0000112E  12FC 0020                160              MOVE.B  #' ',(A1)+
+00001132  12FC 0020                161                          MOVE.B  #' ',(A1)+
+00001136  12FC 0020                162              MOVE.B  #' ',(A1)+
+0000113A  12FC 0020                163              MOVE.B  #' ',(A1)+
+0000113E  12FC 0020                164              MOVE.B  #' ',(A1)+
+00001142  12FC 0020                165              MOVE.B  #' ',(A1)+
+00001146  12FC 0020                166              MOVE.B  #' ',(A1)+
+0000114A  12FC 0020                167              MOVE.B  #' ',(A1)+
+0000114E  12FC 0020                168              MOVE.B  #' ',(A1)+
+00001152  12FC 0020                169              MOVE.B  #' ',(A1)+
+00001156  12FC 0020                170              MOVE.B  #' ',(A1)+
+0000115A  4EB9 00001188            171              JSR    PRINT_GOOD_BUFFER
+00001160                           172  
+00001160                           173  *010
+00001160                           174  WRITE_JSR
+00001160  4291                     175              CLR.L   (A1)            ; Clear data that A1 points to
+00001162  12FC 004A                176              MOVE.B  #'J',(A1)+
+00001166  12FC 0053                177              MOVE.B  #'S',(A1)+
+0000116A  12FC 0052                178              MOVE.B  #'R',(A1)+
+0000116E  4EB9 00001188            179              JSR    PRINT_GOOD_BUFFER    
+00001174                           180  
+00001174                           181  *111
+00001174                           182  WRITE_LEA
+00001174  4291                     183              CLR.L   (A1)            ; Clear data that A1 points to
+00001176  12FC 004C                184              MOVE.B  #'L',(A1)+
+0000117A  12FC 0045                185              MOVE.B  #'E',(A1)+
+0000117E  12FC 0041                186              MOVE.B  #'A',(A1)+
+00001182  4EB9 00001188            187              JSR    PRINT_GOOD_BUFFER
+00001188                           188  
+00001188                           189  ***********************************************************
+00001188                           190  *         0101       ADDQ/SUBQ/Scc/DBcc                   *
+00001188                           191  ***********************************************************
+00001188                           192  
+00001188                           193  CHOOSE0101
+00001188                           194  
+00001188                           195  ***********************************************************
+00001188                           196  *         0110       BSR,BRA,Bcc                          *
+00001188                           197  ***********************************************************
+00001188                           198  
+00001188                           199  CHOOSE0110
+00001188                           200  
+00001188                           201  ***********************************************************
+00001188                           202  *         0111       MOVEQ                                *
+00001188                           203  ***********************************************************
+00001188                           204  
+00001188                           205  CHOOSE0111
+00001188                           206  
+00001188                           207  ***********************************************************
+00001188                           208  *         1000       OR/DIV/SBCD                          *
+00001188                           209  ***********************************************************
+00001188                           210  
+00001188                           211  CHOOSE1000
+00001188                           212  
+00001188                           213  ***********************************************************
+00001188                           214  *         1001       SUB/SUBX                             *
+00001188                           215  ***********************************************************
+00001188                           216  
+00001188                           217  CHOOSE1001
+00001188                           218  
+00001188                           219  ***********************************************************
+00001188                           220  *         1010       Unassigned                           *
+00001188                           221  ***********************************************************
+00001188                           222  
+00001188                           223  CHOOSE1010
+00001188                           224  
+00001188                           225  ***********************************************************
+00001188                           226  *         1011       CMP/EOR                              *
+00001188                           227  ***********************************************************
+00001188                           228  
+00001188                           229  CHOOSE1011
+00001188                           230  
+00001188                           231  ***********************************************************
+00001188                           232  *         1100       AND/MUL/ABCD/EXG                     *
+00001188                           233  ***********************************************************
+00001188                           234  
+00001188                           235  CHOOSE1100
+00001188                           236  
+00001188                           237  ***********************************************************
+00001188                           238  *         1101       ADD/ADDA/ADDX                        *
+00001188                           239  ***********************************************************
+00001188                           240  
+00001188                           241  CHOOSE1101
+00001188                           242  
+00001188                           243  ***********************************************************
+00001188                           244  *         1110       Shift/Rotate                         *
+00001188                           245  ***********************************************************
+00001188                           246  
+00001188                           247  CHOOSE1110
+00001188                           248  
+00001188                           249  ***********************************************************
+00001188                           250  *         1111       Special/Reserved                     *
+00001188                           251  ***********************************************************
+00001188                           252  
+00001188                           253  CHOOSE1111
+00001188                           254  
+00001188                           255  ***********************************************************
+00001188                           256  *         END of 4 MSB Section                            *
+00001188                           257  ***********************************************************
+00001188                           258  
+00001188                           259  PRINT_GOOD_BUFFER
+00001188  43F9 0000E000            260              LEA     GOOD_BUFFER,A1  ; Move A1's pointer back so it can
+0000118E                           261                                      ;   print entire op-code word
+0000118E  103C 0001                262              MOVE.B  #1,D0           ; Load code #1
+00001192  4E4F                     263              TRAP    #15             ; Call Trap #1
+00001194                           264  
+00001194                           265  * Put variables and constants here
+00001194                           266  
+00001194                           267  
+00001194                           268  ****************** Do not write past here *****************            
+00001194                           269              
+00001194                           270              END    START                ; last line of source
 
 No errors detected
 No warnings generated
@@ -212,13 +313,25 @@ CODE1100            10C2
 CODE1101            10C6
 CODE1110            10CA
 CODE1111            10CE
+COMMA               2C
+CR                  D
+C_PAREN             29
 GET_OPCODE          101C
 GOOD_BUFFER         E000
+HASH                23
 JMP_TABLE           1032
+LF                  A
+MINUS               2D
+MONEY               24
 NOP_BITS            4E71
+NULL                0
+O_PAREN             28
+PERIOD              2E
+PLUS                2B
 PRINT_GOOD_BUFFER   1188
 STACK               A000
 START               1000
+TAB                 9
 WRITE_JSR           1160
 WRITE_LEA           1174
 WRITE_NOP           10F8

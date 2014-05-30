@@ -1,20 +1,42 @@
 *-----------------------------------------------------------
-* Title      : Evan's Code
-* Written by : Evan Yang
-* Date       :
-* Description:
+* Title      : Evan's BLUE GROUP Code
+* Written by : Evan Yang AND CO.
+* Date       : 30 MAY 2014
+* Description: 68K DISASSEMBLER
 *-----------------------------------------------------------
+
+********  ADDRESS AND REGISTER DESIGNATIONS  ***************
+
 * D0 holds the bits we are immediately concerned with
 * D1 holds the shift amount
 * D2 holds the entire instruction we are currently decoding
+* D3 holds the size of the OPCODE instruction (Byte, Word, Long)
+
 * A0 holds the JMP_TABLE starting address
 * A1 holds the GOOD_BUFFER starting address
 * A2 holds the BAD_BUFFER starting address 
+
+************************************************************
 
 STACK       EQU     $A000
 GOOD_BUFFER EQU     $0000E000           ; Store valid instruction
 BAD_BUFFER  EQU     $0000F000           ; Store invalid or non-required opcodes
 NOP_BITS    EQU     %0100111001110001
+
+*****    SYMBOLS AND SPECIAL FUNCTIONS/CHARACTERS     ******
+
+CR          EQU     $0D ; Carriage return
+LF          EQU     $0A ; Line feed
+TAB         EQU     $09 ; '   '
+COMMA       EQU     $2C ; ,
+NULL        EQU     $00 ; 
+O_PAREN     EQU     $28 ; (
+C_PAREN     EQU     $29 ; )
+PLUS        EQU     $2B ; +
+MINUS       EQU     $2D ; -
+HASH        EQU     $23 ; #
+MONEY	    EQU	    $24 ; $
+PERIOD      EQU     $2E ; .
         
 START       ORG     $1000               ; first instruction of program
             LEA     STACK,SP            ; Load stack pointer
@@ -81,9 +103,27 @@ CHOOSE0000
 CHOOSE0001
 CHOOSE0010
 CHOOSE0011
-******
-*0100*
-******
+
+***********************************************************
+*         0000       Bit manipulation/MOVEP/Immediate     *
+***********************************************************
+
+***********************************************************
+*         0001       Move Byte                            *
+***********************************************************
+
+***********************************************************
+*         0010       Move Word                            *
+***********************************************************
+
+***********************************************************
+*         0011       Move Long                            *
+***********************************************************
+
+***********************************************************
+*         0100       Miscellaneous                        *
+***********************************************************
+
 CHOOSE0100
             MOVE.W  D2,D0       ; Entire instruction is saved in D2,
                                 ;   so move that into D0
@@ -100,6 +140,8 @@ CHOOSE0100
             BEQ     WRITE_JSR             
             CMP.B   #%111,D0
             BEQ     WRITE_LEA
+            
+*000
 
 *001    
 WRITE_NOP   
@@ -138,6 +180,14 @@ WRITE_JSR
             MOVE.B  #'R',(A1)+
             JSR    PRINT_GOOD_BUFFER    
 
+*011
+
+*100
+
+*101
+
+*110
+
 *111
 WRITE_LEA
             CLR.L   (A1)            ; Clear data that A1 points to
@@ -146,40 +196,95 @@ WRITE_LEA
             MOVE.B  #'A',(A1)+
             JSR    PRINT_GOOD_BUFFER
 
+***********************************************************
+*         0101       ADDQ/SUBQ/Scc/DBcc                   *
+***********************************************************
+
 CHOOSE0101
+
+***********************************************************
+*         0110       BSR,BRA,Bcc    BCS BGE BLT BVC       *
+***********************************************************
+
 CHOOSE0110
+
+***********************************************************
+*         0111       MOVEQ                                *
+***********************************************************
+
 CHOOSE0111
+
+***********************************************************
+*         1000       OR/DIV/SBCD                          *
+***********************************************************
+
 CHOOSE1000
+
+***********************************************************
+*         1001       SUB/SUBX                             *
+***********************************************************
+
 CHOOSE1001
+
+***********************************************************
+*         1010       Unassigned  LEA? NEG? BCLR? JSR? RTS?*
+***********************************************************
+
 CHOOSE1010
+
+***********************************************************
+*         1011       CMP/EOR                              *
+***********************************************************
+
 CHOOSE1011
+
+***********************************************************
+*         1100       AND/MUL/ABCD/EXG                     *
+***********************************************************
+
 CHOOSE1100
+
+***********************************************************
+*         1101       ADD/ADDA/ADDX                        *
+***********************************************************
+
 CHOOSE1101
+
+***********************************************************
+*         1110       Shift/Rotate  LSL LSR ASL ASR ROL ROR*
+***********************************************************
+
 CHOOSE1110
+
+***********************************************************
+*         1111       Special/Reserved                     *
+***********************************************************
+
 CHOOSE1111
+
+***********************************************************
+*         END of 4 MSB Section                            *
+***********************************************************
 
 PRINT_GOOD_BUFFER
             LEA     GOOD_BUFFER,A1  ; Move A1's pointer back so it can
-                                    ;   print entire op-code word
+                                    ; print entire op-code word
+            MOVE.B  #1,D0           ; Load code #1
+            TRAP    #15             ; Call Trap #1
+            
+PRINT_BAD_BUFFER
+            LEA     BAD_BUFFER,A1   ; Move A1's pointer back so it can
+                                    ; print entire op-code word
             MOVE.B  #1,D0           ; Load code #1
             TRAP    #15             ; Call Trap #1
 
 * Put variables and constants here
 
-CR          EQU     $0D ; Carriage return
-LF          EQU     $0A ; Line feed
-TAB         EQU     $09 ; '   '
-COMMA       EQU     $2C ; ,
-NULL        EQU     $00 ; 
-O_PAREN     EQU     $28 ; (
-C_PAREN     EQU     $29 ; )
-PLUS        EQU     $2B ; +
-MINUS       EQU     $2D ; -
-HASH        EQU     $23 ; #
-MONEY	    EQU	    $24 ; $
+
 ****************** Do not write past here *****************            
             
             END    START                ; last line of source
+
 
 
 
